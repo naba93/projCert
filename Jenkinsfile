@@ -28,6 +28,26 @@ pipeline{
 				sh 'docker push nabanita93/samplejavaapp:latest'
 			}
 		}
+		
+		stage('Deploy to K8s')
+		{
+			steps{
+				sshagent(['k8s-jenkins'])
+				{
+					sh 'scp -r -o StrictHostKeyChecking=no node-deployment.yaml ubuntu@18.219.105.37:/home/ubuntu/'
+					
+					script{
+						try{
+							sh 'ssh ubuntu@18.219.105.37 kubectl apply -f /home/ubuntu/node-deployment.yaml --kubeconfig=/home/ubuntu/kube.yaml'
+
+							}catch(error)
+							{
+
+							}
+					}
+				}
+			}
+		}
 	}
 
 	post {
